@@ -24,17 +24,19 @@ import java.util.Optional;
 @Service
 public class ShipService {
 
+    private final ShipMapper shipMapper;
     private final ShipRepository shipRepository;
 
     @Autowired
-    public ShipService( ShipRepository shipRepository) {
+    public ShipService( ShipRepository shipRepository, ShipMapper shipMapper) {
         this.shipRepository = shipRepository;
+        this.shipMapper = shipMapper;
     }
 
     public Optional<ShipDTO> getShipById(int id) {
         Optional<Ship> searchedShip = shipRepository.findById(id);
         if (searchedShip.isPresent()){
-            return searchedShip.map(ShipMapper.INSTANCE::shipToShipDTO);
+            return searchedShip.map(shipMapper::shipToShipDTO);
         }
         return Optional.empty();
     }
@@ -43,7 +45,7 @@ public class ShipService {
         List<Ship> searchedShip = shipRepository.findByNameContaining(name);
         if (!searchedShip.isEmpty()) {
             return searchedShip.stream()
-                    .map(ShipMapper.INSTANCE::shipToShipDTO)
+                    .map(shipMapper::shipToShipDTO)
                     .toList();
         }
         return new ArrayList<>();
@@ -54,7 +56,7 @@ public class ShipService {
         Page<Ship> shipsPage =  shipRepository.findAll(PageRequest.of(page, size));
         if (!shipsPage.isEmpty()) {
             return shipsPage.stream()
-                    .map(ShipMapper.INSTANCE::shipToShipDTO)
+                    .map(shipMapper::shipToShipDTO)
                     .toList();
         }
         return new ArrayList<>();
@@ -80,7 +82,7 @@ public class ShipService {
             response.put("Status", HttpStatus.BAD_REQUEST);
             return response;
         }
-        shipRepository.save(ShipMapper.INSTANCE.shipDTOToShip(shipDTO));
+        shipRepository.save(shipMapper.shipDTOToShip(shipDTO));
         fieldCheck(shipDTO);
 
         response.put("Ship", Optional.of(ShipResponseDTO.builder()
@@ -92,7 +94,7 @@ public class ShipService {
     }
 
     public void updateShip(ShipDTO shipDTO) {
-        shipRepository.save(ShipMapper.INSTANCE.shipDTOToShip(shipDTO));
+        shipRepository.save(shipMapper.shipDTOToShip(shipDTO));
     }
 
     public void deleteShip(int id){

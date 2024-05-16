@@ -29,7 +29,8 @@ class SpaceshipapiServiceTests {
     private ShipRepository shipRepository;
     @Autowired
     private ShipService shipService;
-
+    @Autowired
+    private ShipMapper shipMapper;
 
     @Test
     void testCreateNewShip(){
@@ -46,10 +47,10 @@ class SpaceshipapiServiceTests {
         // THEN
         Optional<ShipDTO> searchedShip = shipService.getShipById(11);
         assertTrue(searchedShip.isPresent());
-        assertEquals(ship.getId(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getId());
-        assertEquals(ship.getName(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getName());
-        assertEquals(ship.getFirstAppearance(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getFirstAppearance());
-        assertEquals(ship.getDateFirstAppearance(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getDateFirstAppearance());
+        assertEquals(ship.getId(), shipMapper.shipDTOToShip(searchedShip.get()).getId());
+        assertEquals(ship.getName(), shipMapper.shipDTOToShip(searchedShip.get()).getName());
+        assertEquals(ship.getFirstAppearance(), shipMapper.shipDTOToShip(searchedShip.get()).getFirstAppearance());
+        assertEquals(ship.getDateFirstAppearance(), shipMapper.shipDTOToShip(searchedShip.get()).getDateFirstAppearance());
 
     }
 
@@ -80,10 +81,10 @@ class SpaceshipapiServiceTests {
 
         // THEN
         assertTrue(searchedShip.isPresent());
-        assertEquals(ship.getId(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getId());
-        assertEquals(ship.getName(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getName());
-        assertEquals(ship.getFirstAppearance(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getFirstAppearance());
-        assertEquals(ship.getDateFirstAppearance(), ShipMapper.INSTANCE.shipDTOToShip(searchedShip.get()).getDateFirstAppearance());
+        assertEquals(ship.getId(), shipMapper.shipDTOToShip(searchedShip.get()).getId());
+        assertEquals(ship.getName(), shipMapper.shipDTOToShip(searchedShip.get()).getName());
+        assertEquals(ship.getFirstAppearance(), shipMapper.shipDTOToShip(searchedShip.get()).getFirstAppearance());
+        assertEquals(ship.getDateFirstAppearance(), shipMapper.shipDTOToShip(searchedShip.get()).getDateFirstAppearance());
 
     }
 

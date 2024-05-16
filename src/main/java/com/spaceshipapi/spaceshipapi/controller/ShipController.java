@@ -77,6 +77,7 @@ public class ShipController {
         Optional<ShipDTO> shipDTO = shipService.getShipById(id);
 
         if (shipDTO.isPresent()){
+            shipService.deleteShip(id);
             ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
                     .ships(List.of(shipDTO.get()))
                     .responseText("Ship with Id "+id+" deleted")
