@@ -15,13 +15,14 @@ import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
-class SpaceapiControllerTests {
+class SpaceshipapiControllerTests {
 
     @MockBean
     private ShipService shipService;
@@ -32,7 +33,7 @@ class SpaceapiControllerTests {
 
     @Test
     void testCreateNewShip(){
-/*
+
         // GIVEN
         ShipDTO shipRequestDTO = new ShipDTO(11, "The classic", "Casablanca", "38 BC");
         Map<String, Object> response = new HashMap<>();
@@ -52,7 +53,10 @@ class SpaceapiControllerTests {
 
         // THEN
         ShipResponseDTO searchedShip = shipResponseDTO.getBody();
-        assertEquals(expected.toString(), searchedShip.toString());*/
+        assertEquals(expected.getShips().get(0).getId(), Objects.requireNonNull(searchedShip).getShips().get(0).getId());
+        assertEquals(expected.getShips().get(0).getName(), searchedShip.getShips().get(0).getName());
+        assertEquals(expected.getShips().get(0).getFirstAppearance(), searchedShip.getShips().get(0).getFirstAppearance());
+        assertEquals(expected.getShips().get(0).getDateFirstAppearance(), searchedShip.getShips().get(0).getDateFirstAppearance());
     }
 
 }
