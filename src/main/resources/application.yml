@@ -1,0 +1,26 @@
+server:
+  port: 8090
+  host: http://localhost
+
+spring:
+  config:
+    activate:
+      on-profile: default
+  application:
+    name: spaceshipapi
+  kafka:
+    bootstrap-servers: localhost:9090
+  datasource:
+    url: jdbc:h2:mem:shipDB
+    username: root
+    password: root
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    operationsSorter: method
+    tagsSorter: alpha

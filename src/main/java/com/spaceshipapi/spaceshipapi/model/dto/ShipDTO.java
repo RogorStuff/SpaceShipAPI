@@ -10,7 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShipDTO {
-
     private Integer id;
     private String name;
     private String firstAppearance;
