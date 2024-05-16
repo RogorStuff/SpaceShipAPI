@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -45,7 +46,10 @@ public class ShipService {
         List<Ship> searchedShip = shipRepository.findByNameContaining(name);
         if (!searchedShip.isEmpty()) {
             return searchedShip.stream()
-                    .map(shipMapper::shipToShipDTO)
+                    .flatMap(ship -> {
+                        ShipDTO shipDTO = shipMapper.shipToShipDTO(ship);
+                        return Stream.of(shipDTO);
+                    })
                     .toList();
         }
         return new ArrayList<>();
