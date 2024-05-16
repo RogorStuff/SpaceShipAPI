@@ -1,5 +1,7 @@
 # SpaceShipAPI
 
+To start the API, write "./up.sh" to start the docker container, or execute "SpaceshipapiApplication.java".
+
 API endpoints definition:
 - GET** /api/spacecrafts?page={number1}&size={number1} :returns the page {number1} with {number2} elements in a list format. If there's not enough elements, returns an empty list.
 - GET** /api/spacecrafts/{number} : returns a list with the element with {number} id. If it doesn't exist, returns an empty list.
