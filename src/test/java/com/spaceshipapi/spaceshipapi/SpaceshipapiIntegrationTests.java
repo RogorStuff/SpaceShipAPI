@@ -13,7 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 
 import java.util.Objects;
 
@@ -168,7 +167,7 @@ class SpaceshipapiIntegrationTests {
             "1, true",
             "2, false"
     })
-    void DeleteShip(int id, boolean canBeFound) throws JSONException {
+    void DeleteShip(int id, boolean canBeFound) {
 
         if (canBeFound){
             // GIVEN

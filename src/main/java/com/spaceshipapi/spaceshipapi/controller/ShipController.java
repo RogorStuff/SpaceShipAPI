@@ -1,5 +1,6 @@
 package com.spaceshipapi.spaceshipapi.controller;
 
+import com.spaceshipapi.spaceshipapi.model.dto.ShipCreateDTO;
 import com.spaceshipapi.spaceshipapi.model.dto.ShipDTO;
 import com.spaceshipapi.spaceshipapi.model.dto.ShipResponseDTO;
 import com.spaceshipapi.spaceshipapi.service.ShipService;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -37,57 +38,52 @@ public class ShipController {
     @PostMapping(path = "/spacecrafts")//, produces = "application/json; charset=UTF-8")
     public ResponseEntity<ShipResponseDTO> postShip(@RequestBody ShipDTO shipDTO) {
 
-        Map<String, Object> shipResponse = shipService.createShip(shipDTO);
-        Optional<ShipResponseDTO> shipResponseDTO = (Optional<ShipResponseDTO>) shipResponse.get("Ship");
-        HttpStatus shipResponseStatus = (HttpStatus) shipResponse.get("Status");
+        ShipResponseDTO shipResponseDto = new ShipResponseDTO();
+        ShipCreateDTO shipResponseCreate = shipService.createShip(shipDTO);
 
-        if (shipResponseDTO.isPresent()){
-            return new ResponseEntity<>(shipResponseDTO.get(), shipResponseStatus);
+        if (Objects.nonNull(shipResponseCreate)){
+            shipResponseDto.setShips(shipResponseCreate.getShips());
+            shipResponseDto.setResponseText(shipResponseCreate.getResponseText());
+            return new ResponseEntity<>(shipResponseDto, shipResponseCreate.getHttpStatus());
         }
 
-        ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                .responseText("Unexpected error found")
-                .build();
+        shipResponseDto.setResponseText("Unexpected error found");
         return new ResponseEntity<>(shipResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // We receive a petition to update a ship
     @PutMapping(path = "/spacecrafts")
     public ResponseEntity<ShipResponseDTO> updateShipById(@RequestBody ShipDTO shipDTO){
+
+        ShipResponseDTO shipResponseDto = new ShipResponseDTO();
         Optional<ShipDTO> shipSearchedDTO = shipService.getShipById(shipDTO.getId());
 
         if (shipSearchedDTO.isPresent()){
             shipService.updateShip(shipDTO);
-            ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                    .ships(List.of(shipDTO))
-                    .responseText("Ship with Id "+shipDTO.getId()+" updated")
-                    .build();
+            shipResponseDto.setShips(List.of(shipDTO));
+            shipResponseDto.setResponseText("Ship with Id "+shipDTO.getId()+" updated");
             return new ResponseEntity<>(shipResponseDto, HttpStatus.OK);
         }
 
-        ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                .responseText("Ship with Id "+shipDTO.getId()+" could not be found")
-                .build();
+        shipResponseDto.setResponseText("Ship with Id "+shipDTO.getId()+" could not be found");
         return new ResponseEntity<>(shipResponseDto, HttpStatus.NOT_FOUND);
     }
 
     // We receive a petition to delete a ship
     @DeleteMapping(path = "/spacecrafts/{id}")
     public ResponseEntity<ShipResponseDTO> deleteShipById(@PathVariable Integer id){
+
+        ShipResponseDTO shipResponseDto = new ShipResponseDTO();
         Optional<ShipDTO> shipDTO = shipService.getShipById(id);
 
         if (shipDTO.isPresent()){
             shipService.deleteShip(id);
-            ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                    .ships(List.of(shipDTO.get()))
-                    .responseText("Ship with Id "+id+" deleted")
-                    .build();
+            shipResponseDto.setShips(List.of(shipDTO.get()));
+            shipResponseDto.setResponseText("Ship with Id "+id+" deleted");
             return new ResponseEntity<>(shipResponseDto, HttpStatus.NO_CONTENT);
         }
 
-        ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                .responseText("Ship with Id "+id+" could not be found")
-                .build();
+        shipResponseDto.setResponseText("Ship with Id "+id+" could not be found");
         return new ResponseEntity<>(shipResponseDto, HttpStatus.NOT_FOUND);
     }
 
@@ -96,12 +92,16 @@ public class ShipController {
     @GetMapping(path = "/spacecrafts/name")
     public ResponseEntity<ShipResponseDTO> getShipName(@RequestParam String name) {
 
+        ShipResponseDTO shipResponseDto = new ShipResponseDTO();
         List<ShipDTO> shipsList = shipService.getShipByName(name);
 
-        ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                .ships(shipsList)
-                .build();
+        if (!shipsList.isEmpty()){
+            shipResponseDto.setResponseText("Ship with name "+name+" found");
+        } else {
+            shipResponseDto.setResponseText("Ship with name "+name+" not found");
+        }
 
+        shipResponseDto.setShips(shipsList);
         return new ResponseEntity<>(shipResponseDto, HttpStatus.OK);
     }
 
@@ -109,12 +109,11 @@ public class ShipController {
     @GetMapping(path = "/spacecrafts")
     public ResponseEntity<ShipResponseDTO> getPageOfShips(@RequestParam int page, @RequestParam int size) {
 
+        ShipResponseDTO shipResponseDto = new ShipResponseDTO();
         List<ShipDTO> shipPage = shipService.getPagedShips(page,size);
 
-        ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                .ships(shipPage)
-                .build();
-
+        shipResponseDto.setShips(shipPage);
+        shipResponseDto.setResponseText("Showing page "+page+" with "+shipPage.size()+" ships");
         return new ResponseEntity<>(shipResponseDto, HttpStatus.OK);
     }
 
@@ -122,19 +121,16 @@ public class ShipController {
     @GetMapping(path = "/spacecrafts/{id}")
     public ResponseEntity<ShipResponseDTO> getShipId(@PathVariable int id) {
 
+        ShipResponseDTO shipResponseDto = new ShipResponseDTO();
         Optional<ShipDTO> shipDTO = shipService.getShipById(id);
 
         if (shipDTO.isPresent()){
-            ShipResponseDTO shipPageDto = ShipResponseDTO.builder()
-                    .ships(List.of(shipDTO.get()))
-                    .responseText("Ship with Id "+id+" found")
-                    .build();
-            return new ResponseEntity<>(shipPageDto, HttpStatus.OK);
+            shipResponseDto.setShips(List.of(shipDTO.get()));
+            shipResponseDto.setResponseText("Ship with Id "+id+" found");
+            return new ResponseEntity<>(shipResponseDto, HttpStatus.OK);
         }
 
-        ShipResponseDTO shipResponseDto = ShipResponseDTO.builder()
-                .responseText("Ship with Id "+id+" could not be found")
-                .build();
+        shipResponseDto.setResponseText("Ship with Id "+id+" could not be found");
         return new ResponseEntity<>(shipResponseDto, HttpStatus.NOT_FOUND);
     }
 

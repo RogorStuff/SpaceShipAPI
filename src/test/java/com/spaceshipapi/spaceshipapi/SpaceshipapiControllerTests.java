@@ -1,6 +1,7 @@
 package com.spaceshipapi.spaceshipapi;
 
 import com.spaceshipapi.spaceshipapi.controller.ShipController;
+import com.spaceshipapi.spaceshipapi.model.dto.ShipCreateDTO;
 import com.spaceshipapi.spaceshipapi.model.dto.ShipDTO;
 import com.spaceshipapi.spaceshipapi.model.dto.ShipResponseDTO;
 import com.spaceshipapi.spaceshipapi.service.ShipService;
@@ -12,11 +13,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,27 +34,22 @@ class SpaceshipapiControllerTests {
 
         // GIVEN
         ShipDTO shipRequestDTO = new ShipDTO(11, "The classic", "Casablanca", "38 BC");
-        Map<String, Object> response = new HashMap<>();
-        response.put("Ship", Optional.of(ShipResponseDTO.builder()
-                .ships(List.of(shipRequestDTO))
-                .responseText("Ship with Id "+shipRequestDTO.getId()+" created")
-                .build()));
-        response.put("Status", HttpStatus.CREATED);
-        Mockito.when(shipService.createShip(any())).thenReturn(response);
+
+        ShipCreateDTO shipResponseDto = new ShipCreateDTO();
+        shipResponseDto.setShips(List.of(shipRequestDTO));
+        shipResponseDto.setResponseText("Ship with Id "+shipRequestDTO.getId()+" created");
+        shipResponseDto.setHttpStatus(HttpStatus.CREATED);
+        Mockito.when(shipService.createShip(any())).thenReturn(shipResponseDto);
 
         // WHEN
         ResponseEntity<ShipResponseDTO> shipResponseDTO = shipController.postShip(shipRequestDTO);
-        ShipResponseDTO expected = ShipResponseDTO.builder()
-                .ships(List.of(shipRequestDTO))
-                .responseText("Ship with Id "+shipRequestDTO.getId()+" created")
-                .build();
 
         // THEN
         ShipResponseDTO searchedShip = shipResponseDTO.getBody();
-        assertEquals(expected.getShips().get(0).getId(), Objects.requireNonNull(searchedShip).getShips().get(0).getId());
-        assertEquals(expected.getShips().get(0).getName(), searchedShip.getShips().get(0).getName());
-        assertEquals(expected.getShips().get(0).getFirstAppearance(), searchedShip.getShips().get(0).getFirstAppearance());
-        assertEquals(expected.getShips().get(0).getDateFirstAppearance(), searchedShip.getShips().get(0).getDateFirstAppearance());
+        assertEquals(shipResponseDto.getShips().get(0).getId(), Objects.requireNonNull(searchedShip).getShips().get(0).getId());
+        assertEquals(shipResponseDto.getShips().get(0).getName(), searchedShip.getShips().get(0).getName());
+        assertEquals(shipResponseDto.getShips().get(0).getFirstAppearance(), searchedShip.getShips().get(0).getFirstAppearance());
+        assertEquals(shipResponseDto.getShips().get(0).getDateFirstAppearance(), searchedShip.getShips().get(0).getDateFirstAppearance());
     }
 
 }

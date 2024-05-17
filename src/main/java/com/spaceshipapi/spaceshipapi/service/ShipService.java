@@ -2,27 +2,29 @@ package com.spaceshipapi.spaceshipapi.service;
 
 import com.spaceshipapi.spaceshipapi.mapper.ShipMapper;
 import com.spaceshipapi.spaceshipapi.model.Ship;
+import com.spaceshipapi.spaceshipapi.model.dto.ShipCreateDTO;
 import com.spaceshipapi.spaceshipapi.model.dto.ShipDTO;
-import com.spaceshipapi.spaceshipapi.model.dto.ShipResponseDTO;
 import com.spaceshipapi.spaceshipapi.model.repository.ShipRepository;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 @Slf4j
 @Service
+@CacheConfig(cacheNames={"spacecrafts"})
 public class ShipService {
 
     private final ShipMapper shipMapper;
@@ -34,6 +36,8 @@ public class ShipService {
         this.shipMapper = shipMapper;
     }
 
+    @Cacheable
+    @CacheEvict
     public Optional<ShipDTO> getShipById(int id) {
         Optional<Ship> searchedShip = shipRepository.findById(id);
         if (searchedShip.isPresent()){
@@ -42,6 +46,8 @@ public class ShipService {
         return Optional.empty();
     }
 
+    @Cacheable
+    @CacheEvict
     public List<ShipDTO> getShipByName(String name) {
         List<Ship> searchedShip = shipRepository.findByNameContaining(name);
         if (!searchedShip.isEmpty()) {
@@ -66,35 +72,27 @@ public class ShipService {
         return new ArrayList<>();
     }
 
-    public Map<String, Object> createShip(ShipDTO shipDTO) {
+    public ShipCreateDTO createShip(ShipDTO shipDTO) {
 
-        Map<String, Object> response = new HashMap<>();
+        ShipCreateDTO shipCreateDTO = new ShipCreateDTO();
         if (Objects.isNull(shipDTO.getId())){
-            response.put("Ship", Optional.of(ShipResponseDTO.builder()
-                    .ships(new ArrayList<>())
-                    .responseText("Ship id is required")
-                    .build()));
-            response.put("Status", HttpStatus.BAD_REQUEST);
-            return response;
+            shipCreateDTO.setResponseText("Ship id is required");
+            shipCreateDTO.setHttpStatus(HttpStatus.BAD_REQUEST);
+            return shipCreateDTO;
         }
 
         if (getShipById(shipDTO.getId()).isPresent()){
-            response.put("Ship", Optional.of(ShipResponseDTO.builder()
-                    .ships(new ArrayList<>())
-                    .responseText("Ship with Id "+shipDTO.getId()+" already exists")
-                    .build()));
-            response.put("Status", HttpStatus.BAD_REQUEST);
-            return response;
+            shipCreateDTO.setResponseText("Ship with Id "+shipDTO.getId()+" already exists");
+            shipCreateDTO.setHttpStatus(HttpStatus.BAD_REQUEST);
+            return shipCreateDTO;
         }
-        shipRepository.save(shipMapper.shipDTOToShip(shipDTO));
-        fieldCheck(shipDTO);
 
-        response.put("Ship", Optional.of(ShipResponseDTO.builder()
-                .ships(List.of(shipDTO))
-                .responseText("Ship with Id "+shipDTO.getId()+" created")
-                .build()));
-        response.put("Status", HttpStatus.CREATED);
-        return response;
+        shipRepository.save(shipMapper.shipDTOToShip(fieldCheck(shipDTO)));
+
+        shipCreateDTO.setShips(List.of(shipDTO));
+        shipCreateDTO.setResponseText("Ship with Id "+shipDTO.getId()+" created");
+        shipCreateDTO.setHttpStatus(HttpStatus.CREATED);
+        return shipCreateDTO;
     }
 
     public void updateShip(ShipDTO shipDTO) {
@@ -106,7 +104,7 @@ public class ShipService {
     }
 
 
-    private void fieldCheck(ShipDTO shipDTO){
+    private ShipDTO fieldCheck(ShipDTO shipDTO){
         if (StringUtils.isEmpty(shipDTO.getName())){
             shipDTO.setName("");
             log.warn("Ship {} created without name", shipDTO.getId());
@@ -119,6 +117,7 @@ public class ShipService {
             shipDTO.setDateFirstAppearance("");
             log.warn("Ship {} created without date of first appearance", shipDTO.getId());
         }
+        return shipDTO;
     }
 
 }
